@@ -5,7 +5,8 @@ Upload cleaned hotel demand data to MongoDB Atlas
 
 Requirements:
 - pymongo installed
-- MongoDB Atlas connection string
+- python-dotenv installed
+- MongoDB Atlas connection string in .env file
 - Cleaned data CSV file
 
 Author: Data Analysis Team
@@ -19,12 +20,18 @@ import pandas as pd
 from datetime import datetime
 import os
 import sys
+from dotenv import load_dotenv
+from pathlib import Path
 
-# Configuration
-MONGO_URI = "mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/"
-DATABASE_NAME = 'hostel_forecasting'
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Configuration - load from environment variables
+MONGO_URI = os.getenv('MONGODB_URI', 'mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/')
+DATABASE_NAME = os.getenv('MONGODB_DB', 'hostel_forecasting')
 COLLECTION_NAME = 'demand_data'
-DATA_FILE = '../data/processed/cleaned_hotel_demand.csv'
+DATA_FILE = str(Path(__file__).parent.parent / 'data' / 'processed' / 'cleaned_hotel_demand.csv')
 
 # Color codes for terminal output
 class Colors:
@@ -56,20 +63,23 @@ def get_mongodb_uri():
     """
     Get MongoDB URI from environment variable or prompt user
     """
-    # Try to get from environment variable
-    uri = os.environ.get('MONGODB_URI', MONGO_URI)
+    # Try to get from environment variable (loaded from .env file)
+    uri = MONGO_URI
     
-    # If still default, prompt user
-    if uri == "mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/":
+    # Check if still using placeholder
+    if '<db_password>' in uri or uri == "mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/":
         print_warning("MongoDB URI not configured!")
-        print("\nPlease update one of the following:")
-        print("1. Set MONGODB_URI environment variable")
-        print("2. Edit MONGO_URI in this script (line 23)")
-        print("3. Enter connection string now")
+        print("\n⚠️  Please update your .env file with the actual MongoDB password")
+        print("   Current .env location:", env_path)
+        print("\nReplace '<db_password>' in MONGODB_URI with your actual MongoDB password")
+        print("\nAlternatively, enter connection string now:")
         
-        user_input = input("\nEnter MongoDB connection string (or press Enter to use default): ").strip()
+        user_input = input("\nEnter MongoDB connection string (or press Enter to exit): ").strip()
         if user_input:
             uri = user_input
+        else:
+            print_error("No valid MongoDB URI provided. Exiting.")
+            sys.exit(1)
     
     return uri
 

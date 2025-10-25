@@ -13,10 +13,16 @@ from pymongo.errors import ConnectionFailure
 import pandas as pd
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+from pathlib import Path
 
-# Configuration
-MONGO_URI = "mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/"
-DATABASE_NAME = 'hostel_forecasting'
+# Load environment variables from .env file
+env_path = Path(__file__).parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+# Configuration - load from environment variables
+MONGO_URI = os.getenv('MONGODB_URI', 'mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/')
+DATABASE_NAME = os.getenv('MONGODB_DB', 'hostel_forecasting')
 COLLECTION_NAME = 'demand_data'
 
 # Color codes for terminal output
@@ -44,8 +50,16 @@ def print_error(text):
 def connect_to_mongodb():
     """Connect to MongoDB"""
     try:
-        # Get URI from environment or use default
-        uri = os.environ.get('MONGODB_URI', MONGO_URI)
+        # Get URI from environment (loaded from .env file)
+        uri = MONGO_URI
+        
+        # Check if still using placeholder
+        if '<db_password>' in uri or uri == "mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/":
+            print_error("MongoDB URI not configured!")
+            print("\n⚠️  Please update your .env file with the actual MongoDB password")
+            print("   Current .env location:", env_path)
+            print("\nReplace '<db_password>' in MONGODB_URI with your actual MongoDB password")
+            return None, None
         
         # Create client
         client = MongoClient(uri, serverSelectionTimeoutMS=5000)
