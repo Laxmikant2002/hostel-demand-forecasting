@@ -1,0 +1,18 @@
+Model Evaluation Results for City Hotel
+==================================================
+
+PROPHET Model:
+  MAE: 32.0745
+  RMSE: 39.8746
+  R2: 0.1283
+
+SARIMA Model:
+  MAE: 39.5101
+  RMSE: 50.3014
+  R2: -0.3871
+
+XGBOOST Model:
+  MAE: 6.9758
+  RMSE: 10.4326
+  R2: 0.9403
+

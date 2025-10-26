@@ -1,0 +1,18 @@
+Model Evaluation Results for Resort Hotel
+==================================================
+
+PROPHET Model:
+  MAE: 18.5633
+  RMSE: 25.0549
+  R2: 0.3796
+
+SARIMA Model:
+  MAE: 32.7596
+  RMSE: 38.4996
+  R2: -0.4649
+
+XGBOOST Model:
+  MAE: 4.9661
+  RMSE: 9.3252
+  R2: 0.9141
+

@@ -15,15 +15,29 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from urllib.parse import quote_plus
 
 # Load environment variables from .env file
 env_path = Path(__file__).parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 # Configuration - load from environment variables
-MONGO_URI = os.getenv('MONGODB_URI', 'mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/')
+raw_uri = os.getenv('MONGODB_URI', 'mongodb+srv://USERNAME:PASSWORD@hostel-data-cluster.xxxxx.mongodb.net/')
 DATABASE_NAME = os.getenv('MONGODB_DB', 'hostel_forecasting')
 COLLECTION_NAME = 'demand_data'
+
+# Automatically encode username and password in URI if present
+def encode_mongo_uri(uri):
+    import re
+    match = re.match(r"mongodb\+srv://([^:]+):([^@]+)@(.+)", uri)
+    if match:
+        user = quote_plus(match.group(1))
+        pwd = quote_plus(match.group(2))
+        rest = match.group(3)
+        return f"mongodb+srv://{user}:{pwd}@{rest}"
+    return uri
+
+MONGO_URI = encode_mongo_uri(raw_uri)
 
 # Color codes for terminal output
 class Colors:
